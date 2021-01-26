@@ -1,14 +1,6 @@
-﻿using MassTransit;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
-using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MasstransitDemo
 {
@@ -43,25 +35,6 @@ namespace MasstransitDemo
 
 
             return services;
-        }
-
-        public static ILoggingBuilder UseSerilog(this ILoggingBuilder builder, IConfiguration configuration)
-        {
-            //var seqServerUrl = configuration["Serilog:SeqServerUrl"];
-            //var logstashUrl = configuration["Serilog:LogstashgUrl"];
-            var outputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}";
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .Enrich.WithProperty("ApplicationContext", Program.AppName)
-                .Enrich.FromLogContext()
-                .WriteTo.Console(outputTemplate: outputTemplate)
-                //.WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
-                //.WriteTo.Http(string.IsNullOrWhiteSpace(logstashUrl) ? "http://logstash:8080" : logstashUrl)
-                .ReadFrom.Configuration(configuration)
-                .Destructure.ByTransforming<HeaderValue>(r => new { r.Key, r.Value })
-                .CreateLogger();
-
-            return builder;
         }
     }
 }

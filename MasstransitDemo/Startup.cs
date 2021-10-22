@@ -72,8 +72,8 @@ namespace MasstransitDemo
                 x.UsingRabbitMq(ConfigureBus);
             });
 
-            services.AddMassTransitHostedService();
-            services.AddHostedService<Worker>();
+            services.AddMassTransitHostedService(true);
+            //services.AddHostedService<Worker>();
         }
 
         private void ConfigureBus(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator cfg)
@@ -101,7 +101,8 @@ namespace MasstransitDemo
             cfg.UsePublishFilter(typeof(Filters.MyPublishFilter<>), context);
             cfg.UseSendFilter(typeof(Filters.MySendFilter<>), context);
             cfg.UseConsumeFilter(typeof(Filters.MyConsumerFilter<>), context);
-            cfg.UseHealthCheck(context);
+            //cfg.UseHealthCheck(context);
+
             cfg.UseJsonSerializer(); // Because we are using json within Quartz for serializer type
             cfg.UseInMemoryScheduler(context.GetRequiredService<ISchedulerFactory>());
             cfg.ConfigureEndpoints(context);
@@ -114,7 +115,15 @@ namespace MasstransitDemo
             //        r.Immediate(5);
             //    });
             //});
+            cfg.ReceiveEndpoint("nowrap-test", e =>
+            {
+                //Hacky hack to allow MassTransit processing of messages not wrapped in envelopes.
+                //Tested with SQS but there is nothing SQS specific so should work with any transport. 
 
+                //data：{"Content":"hello"}
+                e.UseNoEnvelopeMessageDeserializer(); // <---- add this line
+                e.Consumer<TestConsumer>(context);
+            });
             X509Certificate CertificateSelectionCallback(object sender, string targethost, X509CertificateCollection localcertificates, X509Certificate remotecertificate, string[] acceptableissuers)
             {
                 var serverCertificate = localcertificates.OfType<X509Certificate2>()

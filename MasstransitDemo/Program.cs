@@ -3,6 +3,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Events;
 using System;
 
 namespace MasstransitDemo
@@ -19,6 +20,7 @@ namespace MasstransitDemo
                     .Enrich.WithProperty("ApplicationContext", Program.AppName)
                     .Enrich.FromLogContext()
                     .WriteTo.Console(outputTemplate: outputTemplate)
+                    .WriteTo.Seq("http://10.4.7.56:5341")
                     .CreateLogger();
 
             try
@@ -66,6 +68,7 @@ namespace MasstransitDemo
                         .Enrich.WithProperty("ApplicationContext", Program.AppName)
                         .Enrich.FromLogContext()
                         .WriteTo.Console(outputTemplate: outputTemplate)
+                        .WriteTo.Seq("http://10.4.7.56:5341")
                         //.WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
                         //.WriteTo.Http(string.IsNullOrWhiteSpace(logstashUrl) ? "http://logstash:8080" : logstashUrl)
                         .ReadFrom.Configuration(host.Configuration)
